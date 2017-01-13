@@ -24,10 +24,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.inlocomedia.android.InLocoMedia;
 import com.inlocomedia.android.InLocoMediaOptions;
+import com.inlocomedia.android.ads.AdError;
 import com.inlocomedia.android.ads.AdRequest;
 import com.inlocomedia.android.ads.AdType;
 import com.inlocomedia.android.ads.AdView;
 import com.inlocomedia.android.ads.interstitial.InterstitialAd;
+import com.inlocomedia.android.ads.interstitial.InterstitialAdListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,13 +82,6 @@ public class TelaBusca extends FragmentActivity implements OnMapReadyCallback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
-
-        InterstitialAd interstitialAd = new InterstitialAd(this);
-        AdRequest adRequest = new AdRequest();
-        adRequest.setAdUnitId("698cd863655f82878faf9142be932008349c0c8178e368dfaac5bf2e5d7cf9b4");
-        interstitialAd.loadAd(adRequest);
-
-
         InLocoMediaOptions options = InLocoMediaOptions.getInstance(this);
         options.setAdsKey("698cd863655f82878faf9142be932008349c0c8178e368dfaac5bf2e5d7cf9b4");
         options.setLogEnabled(true);
@@ -103,16 +98,46 @@ public class TelaBusca extends FragmentActivity implements OnMapReadyCallback {
 
     @Override
     protected void onRestart() {
+        super.onRestart();
+        callAd();/*
         InterstitialAd interstitialAd = new InterstitialAd(this);
         AdRequest adRequest = new AdRequest();
         adRequest.setAdUnitId("698cd863655f82878faf9142be932008349c0c8178e368dfaac5bf2e5d7cf9b4");
         interstitialAd.loadAd(adRequest);
-        super.onRestart();
-        if (interstitialAd.isLoaded()) {
-            interstitialAd.show();
-        }
+        interstitialAd.show();*/
         setUpMap();
-        interstitialAd.show();
+    }
+
+    private void callAd(){
+        InterstitialAd interstitialAd = new InterstitialAd(this);
+        interstitialAd.setInterstitialAdListener(new InterstitialAdListener() {
+
+            @Override
+            public void onAdReady(final InterstitialAd ad) {
+                //Called when the view has received an advertisement and is ready to be shown
+                //You can call the interstitialAd present method here, or save it for any other moment you wish to present it.
+                ad.show();
+            }
+
+            @Override
+            public void onAdError(InterstitialAd ad, AdError error) {
+                //Called when the ad request has failed.
+            }
+
+            @Override
+            public void onAdOpened(InterstitialAd ad) {
+                //Called right before the interstitialAd content is presented on the screen
+            }
+
+            @Override
+            public void onAdClosed(InterstitialAd ad) {
+                //Called right before the interstitialAd content is dismissed on the screen
+            }
+        });
+
+        AdRequest adRequest = new AdRequest();
+        adRequest.setAdUnitId("698cd863655f82878faf9142be932008349c0c8178e368dfaac5bf2e5d7cf9b4");
+        interstitialAd.loadAd(adRequest);
     }
 
     private void setUpMap() {
@@ -127,13 +152,6 @@ public class TelaBusca extends FragmentActivity implements OnMapReadyCallback {
             return;
         }
         mMap = googleMap;
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-        }
 
         final Button btnBusca = (Button) findViewById(R.id.button_busca);
         btnBusca.setClickable(false);
@@ -154,20 +172,14 @@ public class TelaBusca extends FragmentActivity implements OnMapReadyCallback {
             public void onMapClick(LatLng latLng) {
                 btnBusca.setText("Buscando..");
                 btnBusca.setClickable(false);
-                // Creating a marker
                 MarkerOptions markerOptions = new MarkerOptions();
-                // Setting the position for the marker
                 markerOptions.position(latLng);
                 setMarkerLatLng(new LatLng( latLng.latitude,latLng.longitude ));
-                // Setting the title for the marker.
-                // This will be displayed on taping the marker
                 markerOptions.title(latLng.latitude + " : " + latLng.longitude);
-                // Clears the previously touched position
                 mMap.clear();
-                // Animating to the touched position
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-                // Placing a marker on the touched position
                 mMap.addMarker(markerOptions);
+
                 String urlJSON = "http://api.openweathermap.org/data/2.5/find?lat="+ markerLatLng.latitude +"&lon="+ markerLatLng.longitude +"&cnt=15&APPID=67d182bcf6db8ed76c97c70e04d41625";
                 new asyncGetJson().execute(urlJSON);
 
@@ -186,7 +198,7 @@ public class TelaBusca extends FragmentActivity implements OnMapReadyCallback {
     }
 
 
-
+/*
     private class asyncGetJson extends AsyncTask<String, Void, String> {
 
         @Override
@@ -255,6 +267,6 @@ public class TelaBusca extends FragmentActivity implements OnMapReadyCallback {
         protected void onPostExecute(String message) {
                 setCidadesTratadas(message);
         }
-    }
+    }*/
 
 }
