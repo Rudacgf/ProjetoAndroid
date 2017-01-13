@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Vai Chover?</string>
+    <string name="title_activity_tela_busca">Vai Chover?</string>
+    <string name="title_activity_ListaCidades">Vai Chover?</string>
+    <string name="title_activity_detalhesCidade">Vai Chover?</string>
+</resources>
